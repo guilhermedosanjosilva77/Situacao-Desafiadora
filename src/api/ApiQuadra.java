@@ -1,6 +1,9 @@
 package api;
 
 import static spark.Spark.*;
+
+import java.lang.ref.Cleaner.Cleanable;
+
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -53,11 +56,11 @@ public class ApiQuadra {
 
                     Cliente cliente = dao.buscarPorId(id); // Usa o Long ID
 
-                    if (Cliente != null) {
+                    if (cliente != null) {
                         return gson.toJson(cliente);
                     } else {
                         response.status(404); // Not Found
-                        return "{\"mensagem\": \"Produto com ID " + id + " não encontrado\"}";
+                        return "{\"mensagem\": \"Cliente com ID " + id + " não encontrado\"}";
                     }
                 } catch (NumberFormatException e) {
                     response.status(400); // Bad Request
@@ -71,11 +74,11 @@ public class ApiQuadra {
             @Override
             public Object handle(Request request, Response response) {
                 try {
-                    Produto novoProduto = gson.fromJson(request.body(), Produto.class);
-                    dao.inserir(novoProduto);
+                    Cliente novoCliente = gson.fromJson(request.body(), Cliente.class);
+                    dao.inserir(novoCliente);
 
                     response.status(201); // Created
-                    return gson.toJson(novoProduto);
+                    return gson.toJson(novoCliente);
                 } catch (Exception e) {
                     response.status(500);
                     System.err.println("Erro ao processar requisição POST: " + e.getMessage());
@@ -86,7 +89,7 @@ public class ApiQuadra {
         });
 
         // PUT /produtos/:id - Atualizar produto existente
-        put("/produtos/:id", new Route() {
+        put("/cliente:id", new Route() {
             @Override
             public Object handle(Request request, Response response) {
                 try {
@@ -94,16 +97,16 @@ public class ApiQuadra {
 
                     if (dao.buscarPorId(id) == null) {
                         response.status(404);
-                        return "{\"mensagem\": \"Produto não encontrado para atualização.\"}";
+                        return "{\"mensagem\": \"Cliente não encontrado para atualização.\"}";
                     }
 
-                    Produto produtoParaAtualizar = gson.fromJson(request.body(), Produto.class);
-                    produtoParaAtualizar.setId(id); // garante que o ID da URL seja usado
+                    Cliente clienteParaAtualizar = gson.fromJson(request.body(), Cliente.class);
+                    clienteParaAtualizar.setID(id); // garante que o ID da URL seja usado
 
-                    dao.atualizar(produtoParaAtualizar);
+                    dao.atualizar(clienteParaAtualizar);
 
                     response.status(200); // OK
-                    return gson.toJson(produtoParaAtualizar);
+                    return gson.toJson(clienteParaAtualizar);
 
                 } catch (NumberFormatException e) {
                     response.status(400); // Bad Request
@@ -118,7 +121,7 @@ public class ApiQuadra {
         });
 
         // DELETE /produtos/:id - Deletar um produto
-        delete("/produtos/:id", new Route() {
+        delete("/cliente/:id", new Route() {
             @Override
             public Object handle(Request request, Response response) {
                 try {
@@ -126,7 +129,7 @@ public class ApiQuadra {
 
                     if (dao.buscarPorId(id) == null) {
                         response.status(404);
-                        return "{\"mensagem\": \"Produto não encontrado para exclusão.\"}";
+                        return "{\"mensagem\": \"cliente não encontrado para exclusão.\"}";
                     }
 
                     dao.deletar(id); // Usa o Long ID
@@ -140,6 +143,12 @@ public class ApiQuadra {
                 }
             }
         });
+
+
+
+
+
+        //SESSÃO DOS ALUGUEIS
 
         // get categorias
         get("/categorias", (request, response) -> gson.toJson(categoriaDAO.buscarTodos()));
