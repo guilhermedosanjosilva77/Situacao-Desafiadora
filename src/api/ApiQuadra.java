@@ -2,7 +2,9 @@ package api;
 
 import static spark.Spark.*;
 
-import java.lang.ref.Cleaner.Cleanable;
+
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
 
 import spark.Request;
 import spark.Response;
@@ -10,7 +12,7 @@ import spark.Route;
 import spark.Filter;
 import dao.AluguelDAO;
 import dao.ClienteDAO;
-import model.Quadra;
+import model.Aluguel;
 import model.Cliente;
 
 import com.google.gson.Gson;
@@ -123,7 +125,7 @@ public class ApiQuadra {
         // DELETE /produtos/:id - Deletar um produto
         delete("/cliente/:id", new Route() {
             @Override
-            public Object handle(Request request, Response response) {
+            public Object handle(Request request, Response response) throws SQLIntegrityConstraintViolationException {
                 try {
                     Long id = Long.parseLong(request.params(":id")); // Usa Long
 
@@ -154,17 +156,17 @@ public class ApiQuadra {
         get("/Aluguel", (request, response) -> gson.toJson(AluguelDAO.buscarTodos()));
 
         // GET /categorias/:id - Buscar por ID
-        get("/categorias/:id", (Request request, Response response) -> {
+        get("Aluguel/:id", (Request request, Response response) -> {
             try {
-                Long id = Long.parseLong(request.params(":id"));
+                Long idQuadra = Long.parseLong(request.params(":id_qadra"));
 
-                Categoria categoria = categoriaDAO.buscarPorId(id);
+                List<Aluguel> aluguel = AluguelDAO.buscarPorQuadraId(idQuadra);
 
-                if (categoria != null) {
-                    return gson.toJson(categoria);
+                if (aluguel != null) {
+                    return gson.toJson(aluguel);
                 } else {
                     response.status(404);
-                    return "{\"mensagem\": \"categoria com ID " + id + " não encontrado\"}";
+                    return "{\"mensagem\": \"aluguel com ID " + idQuadra + " não encontrado\"}";
                 }
             } catch (NumberFormatException e) {
                 response.status(400);
@@ -173,10 +175,10 @@ public class ApiQuadra {
         });
 
         // POST /categorias - Criar nova categoria
-        post("/categorias", (request, response) -> {
+        post("/aluguel", (request, response) -> {
             try {
-                Categoria novaCategoria = gson.fromJson(request.body(), Categoria.class);
-                categoriaDAO.inserir(novaCategoria);
+                Aluguel novaCategoria = gson.fromJson(request.body(), Aluguel.class);
+                AluguelDAO.inserir(novaCategoria);
 
                 response.status(201); // Created
                 return gson.toJson(novaCategoria);
@@ -184,7 +186,7 @@ public class ApiQuadra {
                 response.status(500);
                 System.err.println("Erro ao processar requisição POST: " + e.getMessage());
                 e.printStackTrace();
-                return "{\"mensagem\": \"Erro ao criar categoria.\"}";
+                return "{\"mensagem\": \"Erro ao criar aluguel.\"}";
             }
         });
 
@@ -193,18 +195,18 @@ public class ApiQuadra {
             try {
                 Long id = Long.parseLong(request.params(":id")); // Usa Long
 
-                if (categoriaDAO.buscarPorId(id) == null) {
+                if (AluguelDAO.buscarPorQuadraId(id) == null) {
                     response.status(404);
-                    return "{\"mensagem\": \"Categoria não encontrada para atualização.\"}";
+                    return "{\"mensagem\": \"aluguel não encontrado para atualização.\"}";
                 }
 
-                Categoria categoriaParaAtualizar = gson.fromJson(request.body(), Categoria.class);
-                categoriaParaAtualizar.setId(id); // garante que o ID da URL seja usado
+                Aluguel aluguelParaAtualizar = gson.fromJson(request.body(), Aluguel.class);
+                aluguelParaAtualizar.setIdQuadra(id); // garante que o ID da URL seja usado
 
-                categoriaDAO.atualizar(categoriaParaAtualizar);
+                AluguelDAO.atualizar( aluguelParaAtualizar);
 
                 response.status(200); // OK
-                return gson.toJson(categoriaParaAtualizar);
+                return gson.toJson( aluguelParaAtualizar);
 
             } catch (NumberFormatException e) {
                 response.status(400); // Bad Request
@@ -222,12 +224,12 @@ public class ApiQuadra {
             try {
                 Long id = Long.parseLong(request.params(":id")); // Usa Long
 
-                if (categoriaDAO.buscarPorId(id) == null) {
+                if (AluguelDAO.buscarPorQuadraId(id) == null) {
                     response.status(404);
                     return "{\"mensagem\": \"Categoria não encontrada para exclusão.\"}";
                 }
 
-                categoriaDAO.deletar(id);
+                AluguelDAO.deletar(id);
 
                 response.status(204);
                 return "";
@@ -248,5 +250,10 @@ public class ApiQuadra {
         });
 
         System.out.println("API de Produtos iniciada na porta 4567. Acesse: http://localhost:4567/produtos");
+    }
+
+    private static void get(String path, Route route) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'get'");
     }
 }
