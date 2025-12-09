@@ -1,47 +1,38 @@
 package model;
 
-import java.time.LocalDateTime; // Usando LocalDateTime para representar a coluna DATETIME do SQL
+import java.sql.Date; // Usando LocalDateTime para representar a coluna DATETIME do SQL
 
 public class Aluguel {
 
     private Long id_locacao;
-    
-    
 
     // O ID da Quadra é a chave estrangeira (quadra_idquadra)
     private Long idQuadra;
-    
+
     // O ID do Cliente é a chave estrangeira (cliente_idcliente)
     private Long idCliente;
-    
+
     // A data e hora da locação (data_locacao)
-    private LocalDateTime dataLocacao;
+    private Date dataLocacao;
 
     // Construtor padrão (vazio)
     public Aluguel() {
     }
 
-    
-
     // Construtor com todos os atributos
-   
 
     // --- Getters e Setters ---
 
-    public Aluguel(Long id_locacao, Long idQuadra, Long idCliente, LocalDateTime dataLocacao) {
+    public Aluguel(Long id_locacao, Long idQuadra, Long idCliente, Date dataLocacao) {
         this.id_locacao = id_locacao;
         this.idQuadra = idQuadra;
         this.idCliente = idCliente;
         this.dataLocacao = dataLocacao;
     }
 
-
-
     public Long getId_locacao() {
         return id_locacao;
     }
-
-
 
     public void setId_locacao(Long id_locacao) {
         this.id_locacao = id_locacao;
@@ -63,11 +54,11 @@ public class Aluguel {
         this.idCliente = idCliente;
     }
 
-    public LocalDateTime getDataLocacao() {
+    public Date getDataLocacao() {
         return dataLocacao;
     }
 
-    public void setDataLocacao(LocalDateTime dataLocacao) {
+    public void setDataLocacao(Date dataLocacao) {
         this.dataLocacao = dataLocacao;
     }
 }

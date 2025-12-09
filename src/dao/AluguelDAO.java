@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class AluguelDAO {
                         rs.getLong("idlocacao"),
                         rs.getLong("quadra_idquadra"),
                         rs.getLong("cliente_idcliente"),
-                        rs.getObject("datalocacao", LocalDateTime.class));
+                       rs.getDate("datalocacao"));
                 Locacao.add(aluguel);
             }
         } catch (Exception e) {
@@ -66,8 +65,7 @@ public class AluguelDAO {
                             rs.getLong("idlocacao"),
                             rs.getLong("quadra_idquadra"),
                             rs.getLong("cliente_idcliente"),
-                            rs.getObject("datalocacao", LocalDateTime.class));
-
+                            rs.getDate("datalocacao"));
                     lista.add(aluguel);
                 }
             }
