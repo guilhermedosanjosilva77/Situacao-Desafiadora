@@ -80,32 +80,34 @@ public class AluguelDAO {
     // ======================================//
     // CREATE
     // ======================================//
-    public void inserir(Aluguel aluguel) {
+    public void inserir(Aluguel aluguel) throws SQLException {
 
-        // usa Statement.RETURN_GENERATED_KEYS para solicitar o ID gerado
-        String sql = "INSERT INTO locacao (Quadra_id_quadra, Cliente_idCliente, datalocacao) VALUES (?,?,?)";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setLong(1, aluguel.getIdQuadra());
-            stmt.setLong(2, aluguel.getIdCliente());
-            stmt.setObject(3, aluguel.getDataLocacao());
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    // define o ID no objeto Produto que foi passado (importante para a API)
-                    aluguel.setId_locacao(rs.getLong(1));
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err
-                    .println("Erro ao inserir aluguel: " + aluguel.getIdCliente() + ". Detalhes: " + e.getMessage());
-            e.printStackTrace();
-        }
+    // REGRA DE NEGÓCIO: cliente só pode ter 1 aluguel
+    if (clienteJaPossuiAluguel(aluguel.getIdCliente())) {
+        throw new SQLException("O cliente já possui uma quadra alugada!");
     }
+
+    String sql = "INSERT INTO locacao (Quadra_id_quadra, Cliente_idCliente, datalocacao) VALUES (?,?,?)";
+
+    try (Connection conn = ConnectionFactory.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+        stmt.setLong(1, aluguel.getIdQuadra());
+        stmt.setLong(2, aluguel.getIdCliente());
+        stmt.setObject(3, aluguel.getDataLocacao());
+        stmt.executeUpdate();
+
+        try (ResultSet rs = stmt.getGeneratedKeys()) {
+            if (rs.next()) {
+                aluguel.setId_locacao(rs.getLong(1));
+            }
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Erro ao inserir aluguel: " + aluguel.getIdCliente() + ". " + e.getMessage());
+        throw e;
+    }
+}
 
     // ------------------------------------
     // UPDATE
@@ -159,4 +161,38 @@ public class AluguelDAO {
             throw new SQLIntegrityConstraintViolationException();
         }
     }
+
+
+    // Cliente já possui aluguel cadastrado
+public boolean clienteJaPossuiAluguel(Long idCliente) throws SQLException {
+
+    String sql = "SELECT COUNT(*) FROM locacao WHERE Cliente_idCliente = ?";
+
+    try (Connection conn = ConnectionFactory.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setLong(1, idCliente);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                int qtd = rs.getInt(1);
+
+                if (qtd > 0) {
+                    // ERRO: cliente já possui um aluguel cadastrado
+                    throw new SQLException(
+                        "Erro: O cliente ID " + idCliente + " já possui um aluguel cadastrado."
+                    );
+                }
+
+                return false; 
+            }
+        }
+    } catch (SQLException e) {
+        throw e; 
+    }
+
+    return false;
+}
+
 }
