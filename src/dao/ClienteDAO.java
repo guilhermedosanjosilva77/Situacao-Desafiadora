@@ -48,13 +48,13 @@ public class ClienteDAO {
 
         Cliente cliente = null;
 
-        // dao/ClienteDAO.java - CREATE (Correto)
-String sql = "INSERT INTO cliente (Nome, Telefone) VALUES (?, ?)"; 
-// ... usa Statement.RETURN_GENERATED_KEYS para recuperar o ID gerado
+        // CORREÇÃO: Usar a instrução SELECT correta para buscar por ID
+        String sql = "SELECT * FROM cliente WHERE id_cliente = ?"; 
 
         try (Connection conn = ConnectionFactory.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            // CORREÇÃO: Setar o ID no único parâmetro '?'
             stmt.setLong(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {

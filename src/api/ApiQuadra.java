@@ -59,7 +59,15 @@ public class ApiQuadra {
                     // converter o parâmetro da URL (String) para Long, que é o tipo do ID
                     Long id = Long.parseLong(request.params(":id"));
 
-                    Cliente cliente = dao.buscarPorId(id); // Usa o Long ID
+                    System.out.println("DEBUG: Tentando buscar Cliente ID: " + id);
+
+                    Cliente cliente = dao.buscarPorId(id);
+
+                    if (cliente != null) {
+                        System.out.println("DEBUG: Cliente encontrado: " + cliente.toString());
+                    } else {
+                        System.out.println("DEBUG: Cliente não encontrado, retornando 404.");
+                    }
 
                     if (cliente != null) {
                         return gson.toJson(cliente);
@@ -106,7 +114,7 @@ public class ApiQuadra {
                         return "{\"mensagem\": \"Cliente não encontrado para atualização.\"}";
                     }
 
-                    // gson.fromJson(request.body(), Cliente.class) ⬅️ JÁ USA O GSON CONFIGURADO
+                    // gson.fromJson(request.body(), Cliente.class)
                     Cliente clienteParaAtualizar = gson.fromJson(request.body(), Cliente.class);
                     clienteParaAtualizar.setID(id); // garante que o ID da URL seja usado
 
